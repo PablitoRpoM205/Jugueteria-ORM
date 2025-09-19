@@ -9,7 +9,7 @@ from entities.venta import Venta
 
 
 def crear_juguete(
-    db: Session, nombre: str, precio: float, stock: int, tipo: str, actor_id=None
+    db: Session, nombre: str, precio: float, stock: int, tipo: str, actor_id
 ):
     """
     Crea un juguete nuevo.
@@ -85,3 +85,21 @@ def aplicar_descuento(db: Session, juguete_id, porcentaje: int, actor_id=None):
     if mensaje:
         return True, mensaje
     return True, f"Descuento aplicado: {aplicado}%. Nuevo precio: {juguete.precio:.2f}"
+
+
+def eliminar_juguete(db: Session, juguete_id: int):
+    """
+    Elimina un juguete por su ID si no tiene ventas asociadas.
+    """
+    juguete = db.get(Juguete, juguete_id)
+    if not juguete:
+        return False, "Juguete no encontrado."
+    ventas = db.query(Venta).filter(Venta.juguete_id == juguete_id).count()
+    if ventas > 0:
+        return (
+            False,
+            "No se puede eliminar: ya existen ventas asociadas a este juguete.",
+        )
+    db.delete(juguete)
+    db.commit()
+    return True, f"Juguete '{juguete.nombre}' eliminado correctamente."

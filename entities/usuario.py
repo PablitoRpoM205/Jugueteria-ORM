@@ -1,10 +1,26 @@
-from sqlalchemy import Column, Integer, String
-from database.connection import Base
+"""
+Entidad Usuario.
+Modelo para almacenar credenciales y datos básicos de usuario.
+"""
 
-class Usuario(Base):
+import uuid
+from sqlalchemy import Boolean, Column, DateTime, String
+from sqlalchemy.dialects.postgresql import UUID
+from database.connection import Base
+from entities.base import AuditMixin
+
+
+class Usuario(Base, AuditMixin):
+    """
+    Tabla usuarios.
+    """
+
     __tablename__ = "usuarios"
 
-    id = Column(Integer, primary_key=True, index=True)
-    nombre = Column(String, nullable=False)
-    correo = Column(String, unique=True, nullable=False)
-    contraseña = Column(String, nullable=False)
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    nombre = Column(String(100), nullable=False)
+    nombre_usuario = Column(String(50), unique=True, index=True, nullable=False)
+    correo = Column(String(150), unique=True, index=True, nullable=False)
+    contraseña_hash = Column(String(255), nullable=False)
+    telefono = Column(String(20), nullable=False)
+    es_admin = Column(Boolean, default=False)

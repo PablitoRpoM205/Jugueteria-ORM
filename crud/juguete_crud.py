@@ -1,43 +1,87 @@
+"""
+Operaciones para juguetes e inventario.
+"""
+
 from sqlalchemy.orm import Session
 from entities.juguete import Juguete
+from entities.inventario import Inventario
+from entities.venta import Venta
 
-def crear_juguete(db: Session, nombre: str, precio: float, stock: int, tipo: str):
-    nuevo_juguete = Juguete(nombre=nombre, precio=precio, stock=stock, tipo=tipo)
-    db.add(nuevo_juguete)
+
+def crear_juguete(
+    db: Session, nombre: str, precio: float, stock: int, tipo: str, actor_id=None
+):
+    """
+    Crea un juguete nuevo.
+    """
+    nuevo = Juguete(
+        nombre=nombre,
+        precio=precio,
+        stock=stock,
+        tipo=tipo,
+        id_usuario_creacion=actor_id,
+        id_usuario_edicion=actor_id,
+    )
+    db.add(nuevo)
     db.commit()
-    db.refresh(nuevo_juguete)
-    return nuevo_juguete
+    db.refresh(nuevo)
+    return nuevo
+
 
 def obtener_juguetes(db: Session):
-    return db.query(Juguete).all()
+    """
+    Retorna todos los juguetes.
+    """
+    return db.query(Juguete).order_by(Juguete.nombre).all()
 
-def obtener_juguete_por_nombre(db: Session, nombre: str):
-    return db.query(Juguete).filter(Juguete.nombre.ilike(nombre)).first()
 
-def vender_juguete(db: Session, nombre: str, cantidad: int):
-    juguete = obtener_juguete_por_nombre(db, nombre)
+def buscar_juguete_por_nombre(db: Session, nombre: str):
+    return db.query(Juguete).filter(Juguete.nombre.ilike(f"%{nombre}%")).all()
+
+
+def vender_juguete(db: Session, juguete_id, usuario_id_vendio, cantidad: int):
+    juguete = db.get(Juguete, juguete_id)
     if not juguete:
-        return "Juguete no encontrado."
+        return False, "Juguete no encontrado."
+
     if cantidad <= 0 or cantidad > juguete.stock:
-        return "No hay suficiente stock."
-    juguete.stock -= cantidad
-    db.commit()
-    return f"Se vendieron {cantidad} {juguete.nombre}(s)."
+        return False, "Stock insuficiente."
 
-def aplicar_descuento(db: Session, nombre: str, porcentaje: int):
-    juguete = obtener_juguete_por_nombre(db, nombre)
+    precio_unitario = juguete.precio
+    total = precio_unitario * cantidad
+    juguete.stock -= cantidad
+    venta = Venta(
+        usuario_id_vendio=usuario_id_vendio,
+        juguete_id=juguete.id,
+        cantidad=cantidad,
+        precio_unitario=precio_unitario,
+        total=total,
+        id_usuario_creacion=usuario_id_vendio,
+        id_usuario_edicion=usuario_id_vendio,
+    )
+    db.add(venta)
+    db.commit()
+    db.refresh(venta)
+    return True, venta
+
+
+def aplicar_descuento(db: Session, juguete_id, porcentaje: int, actor_id=None):
+    juguete = db.get(Juguete, juguete_id)
     if not juguete:
-        return "Juguete no encontrado."
+        return False, "Juguete no encontrado."
 
     limites = {"electronico": 20, "didactico": 15, "coleccionable": 4}
-    max_descuento = limites.get(juguete.tipo.lower(), 10)
+    max_desc = limites.get(juguete.tipo.lower(), 10)
+    aplicado = porcentaje
+    mensaje = None
+    if porcentaje > max_desc:
+        aplicado = max_desc
+        mensaje = f"Se aplicó el máximo de {max_desc}% para tipo {juguete.tipo}."
 
-    if porcentaje > max_descuento:
-        porcentaje = max_descuento
-        msg = f"El porcentaje máximo para {juguete.tipo} es {max_descuento}%."
-    else:
-        msg = f"Se aplicó el {porcentaje}% de descuento."
-
-    juguete.precio -= juguete.precio * (porcentaje / 100)
+    juguete.precio = juguete.precio * (1 - aplicado / 100)
+    juguete.id_usuario_edicion = actor_id
     db.commit()
-    return f"{msg} Nuevo precio: {juguete.precio:.2f}"
+    db.refresh(juguete)
+    if mensaje:
+        return True, mensaje
+    return True, f"Descuento aplicado: {aplicado}%. Nuevo precio: {juguete.precio:.2f}"

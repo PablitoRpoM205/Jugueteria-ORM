@@ -1,28 +1,39 @@
 """
-Operaciones CRUD básicas para usuarios.
-Incluye creación con hash simple de contraseña y búsqueda por correo.
+Operaciones CRUD para usuarios.
 """
 
-import hashlib
 from sqlalchemy.orm import Session
 from entities.usuario import Usuario
+import uuid
+import hashlib
+import random
 
 
 def hash_password(password: str) -> str:
+    """
+    Hashea una contraseña usando SHA256.
+    """
     return hashlib.sha256(password.encode("utf-8")).hexdigest()
 
 
-def crear_usuario(db: Session, nombre: str, correo: str, password: str, actor_id=None):
+def crear_usuario(db: Session, username: str, password: str, rol: str, actor_id=None):
     """
-    Crea un usuario y retorna la instancia.
+    Crea un nuevo usuario en la base de datos.
     """
-    pwd_hash = hash_password(password)
     nuevo = Usuario(
-        nombre=nombre,
-        correo=correo,
-        password_hash=pwd_hash,
-        id_usuario_creacion=actor_id,
-        id_usuario_edicion=actor_id,
+        id=uuid.uuid4(),
+        nombre=username,
+        nombre_usuario=username,
+        correo=f"{username}@jugueteria.com",
+        contraseña_hash=hash_password(password),
+        telefono=random.randint(3000000000, 3999999999),
+        es_admin=(rol == "admin"),
+        id_usuario_creacion=(
+            actor_id if actor_id else uuid.UUID("00000000-0000-0000-0000-000000000001")
+        ),
+        id_usuario_edicion=(
+            actor_id if actor_id else uuid.UUID("00000000-0000-0000-0000-000000000001")
+        ),
     )
     db.add(nuevo)
     db.commit()
@@ -30,19 +41,27 @@ def crear_usuario(db: Session, nombre: str, correo: str, password: str, actor_id
     return nuevo
 
 
-def autenticar(db: Session, correo: str, password: str):
+def buscar_usuario_por_username(db: Session, username: str):
     """
-    Autentica por correo y contraseña, retorna usuario si coincide.
+    Busca un usuario por su nombre de usuario.
     """
-    pwd_hash = hash_password(password)
-    usuario = db.query(Usuario).filter(Usuario.correo == correo).first()
-    if usuario and usuario.password_hash == pwd_hash:
+    return db.query(Usuario).filter(Usuario.nombre_usuario == username).first()
+
+
+def autenticar(db: Session, username: str, password: str):
+    """
+    Verifica credenciales de acceso.
+    """
+    usuario = buscar_usuario_por_username(db, username)
+    if not usuario:
+        return None
+    if usuario.contraseña_hash == hash_password(password):
         return usuario
     return None
 
 
-def listar_usuarios(db: Session, limit: int = 50):
+def listar_usuarios(db: Session):
     """
-    Retorna lista de usuarios.
+    Devuelve todos los usuarios ordenados por nombre de usuario.
     """
-    return db.query(Usuario).limit(limit).all()
+    return db.query(Usuario).order_by(Usuario.username).all()

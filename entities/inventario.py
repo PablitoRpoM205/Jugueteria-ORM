@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, ForeignKey
 from database.connection import Base
 
+
 class Inventario(Base):
     __tablename__ = "inventario"
 

@@ -1,9 +1,23 @@
-from sqlalchemy import Column, Integer, ForeignKey, Boolean
-from database.connection import Base
+"""
+Entidad Coleccionable: subtipo de juguete con datos adicionales.
+"""
 
-class Coleccionable(Base):
+import uuid
+from sqlalchemy import Column, Boolean, ForeignKey
+from sqlalchemy.dialects.postgresql import UUID
+from database.connection import Base
+from entities.base import AuditMixin
+
+
+class Coleccionable(Base, AuditMixin):
+    """
+    Tabla coleccionables con referencia al juguete padre.
+    """
+
     __tablename__ = "coleccionables"
 
-    id = Column(Integer, primary_key=True)
-    juguete_id = Column(Integer, ForeignKey("juguetes.id"), unique=True)
-    edicion_limitada = Column(Boolean, default=False)
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    juguete_id = Column(
+        UUID(as_uuid=True), ForeignKey("juguetes.id"), nullable=False, unique=True
+    )
+    edicion_limitada = Column(Boolean, nullable=False, default=False)

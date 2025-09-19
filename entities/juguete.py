@@ -1,11 +1,28 @@
-from sqlalchemy import Column, Integer, String, Float
-from database.connection import Base
+"""
+Tabla juguetes. 'tipo' discrimina el subtipo (electronico, didactico, coleccionable).
+Todas las tablas usan UUID como id primario.
+"""
 
-class Juguete(Base):
+import uuid
+from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, func
+from sqlalchemy.dialects.postgresql import UUID
+from database.connection import Base
+from entities.base import AuditMixin
+
+
+class Juguete(Base, AuditMixin):
+    """
+    Tabla juguetes. 'tipo' discrimina el subtipo (electronico, didactico, coleccionable).
+    Todas las tablas usan UUID como id primario.
+    """
+
     __tablename__ = "juguetes"
 
-    id = Column(Integer, primary_key=True, index=True)
-    nombre = Column(String, nullable=False)
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    nombre = Column(String(200), nullable=False, index=True)
+    descripcion = Column(String(255), nullable=True)
+    tipo = Column(String(50), nullable=False)
     precio = Column(Float, nullable=False)
-    stock = Column(Integer, default=0)
-    tipo = Column(String, nullable=False)
+    stock = Column(Integer, nullable=False, default=0)
+    tipo = Column(String(50), nullable=False)
+    es_edicion_limitada = Column(Boolean, default=False)

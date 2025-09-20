@@ -6,7 +6,7 @@ Este proyecto implementa un sistema de inventario para una juguetería que permi
 - **Juguetes Electrónicos**: Con descuento máximo del 20%.
 - **Juguetes Didácticos**: Con descuento máximo del 15%.
 - **Juguetes Coleccionables**: Con descuento máximo del 4%
-Cada tipo de juguete tiene sus propias reglas de descuento y hereda funcionalidades básicas de la clase padre `Juguete`.
+- Cada tipo de juguete tiene sus propias reglas de descuento y hereda funcionalidades básicas de la clase padre `Juguete`.
 
 ## Características
 

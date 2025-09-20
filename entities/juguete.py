@@ -6,6 +6,7 @@ Todas las tablas usan UUID como id primario.
 import uuid
 from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, func
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship
 from database.connection import Base
 from entities.base import AuditMixin
 
@@ -24,5 +25,29 @@ class Juguete(Base, AuditMixin):
     tipo = Column(String(50), nullable=False)
     precio = Column(Float, nullable=False)
     stock = Column(Integer, nullable=False, default=0)
-    tipo = Column(String(50), nullable=False)
     es_edicion_limitada = Column(Boolean, default=False)
+
+    ventas = relationship(
+        "Venta", back_populates="juguete", cascade="all, delete-orphan"
+    )
+    inventarios = relationship(
+        "Inventario", back_populates="juguete", cascade="all, delete-orphan"
+    )
+    coleccionable = relationship(
+        "Coleccionable",
+        uselist=False,
+        back_populates="juguete",
+        cascade="all, delete-orphan",
+    )
+    didactico = relationship(
+        "Didactico",
+        uselist=False,
+        back_populates="juguete",
+        cascade="all, delete-orphan",
+    )
+    electronico = relationship(
+        "Electronico",
+        uselist=False,
+        back_populates="juguete",
+        cascade="all, delete-orphan",
+    )

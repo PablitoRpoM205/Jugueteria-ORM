@@ -6,6 +6,9 @@ from sqlalchemy.orm import Session
 from entities.juguete import Juguete
 from entities.inventario import Inventario
 from entities.venta import Venta
+from entities.electronico import Electronico
+from entities.didactico import Didactico
+from entities.coleccionable import Coleccionable
 
 
 def crear_juguete(
@@ -25,6 +28,39 @@ def crear_juguete(
     db.add(nuevo)
     db.commit()
     db.refresh(nuevo)
+
+    if tipo == "electronico":
+        electronico = Electronico(
+            juguete_id=nuevo.id,
+            id_usuario_creacion=actor_id,
+            id_usuario_edicion=actor_id,
+        )
+        db.add(electronico)
+    elif tipo == "didactico":
+        didactico = Didactico(
+            juguete_id=nuevo.id,
+            id_usuario_creacion=actor_id,
+            id_usuario_edicion=actor_id,
+        )
+        db.add(didactico)
+    elif tipo == "coleccionable":
+        coleccionable = Coleccionable(
+            juguete_id=nuevo.id,
+            id_usuario_creacion=actor_id,
+            id_usuario_edicion=actor_id,
+        )
+        db.add(coleccionable)
+
+    inventario = Inventario(
+        usuario_id=actor_id,
+        juguete_id=nuevo.id,
+        cantidad=stock,
+        id_usuario_creacion=actor_id,
+        id_usuario_edicion=actor_id,
+    )
+    db.add(inventario)
+
+    db.commit()
     return nuevo
 
 

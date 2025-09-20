@@ -1,4 +1,9 @@
 from database.connection import SessionLocal, Base, engine
+from entities.usuario import Usuario
+from entities.electronico import Electronico
+from entities.didactico import Didactico
+from entities.coleccionable import Coleccionable
+from entities.inventario import Inventario
 from auth.auth import login_console, registrar_usuario_console
 from crud.juguete_crud import (
     crear_juguete,

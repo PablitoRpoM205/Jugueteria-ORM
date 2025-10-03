@@ -15,4 +15,4 @@ class Juguete(Base):
 
     usuario = relationship(
         "Usuario"
-    )  # Opcional: si quieres acceder al usuario desde el juguete
+    )  

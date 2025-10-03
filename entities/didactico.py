@@ -8,7 +8,7 @@ class Didactico(Base):
     nombre = Column(String, index=True)
     precio = Column(Integer)
     stock = Column(Integer)
-    tipo = Column(String, default="didactico")  # Tipo específico para juguetes didácticos
+    tipo = Column(String, default="didactico") 
 
     def __repr__(self):
         return f"<Didactico(nombre={self.nombre}, precio={self.precio}, stock={self.stock})>"

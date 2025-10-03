@@ -1,25 +1,17 @@
-"""${message}
+# filepath: /home/pablito/Documentos/Jugueteria-ORM/migrations/script.py.mako
+# Este archivo es una plantilla para generar scripts de migración.
 
-Revision ID: ${up_revision}
-Revises: ${down_revision | comma,n}
-Create Date: ${create_date}
+from sqlalchemy import MetaData
 
-"""
-from alembic import op
-import sqlalchemy as sa
-${imports if imports else ""}
+revision = '${rev}'
+down_revision = '${down_rev}'
+branch_labels = ${branch_label}
+depends_on = ${depends_on}
 
-# revision identifiers, used by Alembic.
-revision = ${repr(up_revision)}
-down_revision = ${repr(down_revision)}
-branch_labels = ${repr(branch_labels)}
-depends_on = ${repr(depends_on)}
+def upgrade():
+    # Código para aplicar la migración
+    pass
 
-
-def upgrade() -> None:
-    ${upgrades if upgrades else "pass"}
-
-
-def downgrade() -> None:
-    ${downgrades if downgrades else "pass"}
-
+def downgrade():
+    # Código para revertir la migración
+    pass

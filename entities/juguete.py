@@ -1,53 +1,18 @@
-"""
-Tabla juguetes. 'tipo' discrimina el subtipo (electronico, didactico, coleccionable).
-Todas las tablas usan UUID como id primario.
-"""
-
-import uuid
-from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, func
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import Column, Integer, String, Float, ForeignKey
 from sqlalchemy.orm import relationship
-from database.connection import Base
-from entities.base import AuditMixin
+from entities.base import Base
 
 
-class Juguete(Base, AuditMixin):
-    """
-    Tabla juguetes. 'tipo' discrimina el subtipo (electronico, didactico, coleccionable).
-    Todas las tablas usan UUID como id primario.
-    """
-
+class Juguete(Base):
     __tablename__ = "juguetes"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    nombre = Column(String(200), nullable=False, index=True)
-    descripcion = Column(String(255), nullable=True)
-    tipo = Column(String(50), nullable=False)
+    id = Column(Integer, primary_key=True, index=True)
+    nombre = Column(String, nullable=False)
     precio = Column(Float, nullable=False)
-    stock = Column(Integer, nullable=False, default=0)
-    es_edicion_limitada = Column(Boolean, default=False)
+    stock = Column(Integer, nullable=False)
+    tipo = Column(String, nullable=False)
+    usuario_id = Column(Integer, ForeignKey("usuarios.id"))  # <-- Agrega esta línea
 
-    ventas = relationship(
-        "Venta", back_populates="juguete", cascade="all, delete-orphan"
-    )
-    inventarios = relationship(
-        "Inventario", back_populates="juguete", cascade="all, delete-orphan"
-    )
-    coleccionable = relationship(
-        "Coleccionable",
-        uselist=False,
-        back_populates="juguete",
-        cascade="all, delete-orphan",
-    )
-    didactico = relationship(
-        "Didactico",
-        uselist=False,
-        back_populates="juguete",
-        cascade="all, delete-orphan",
-    )
-    electronico = relationship(
-        "Electronico",
-        uselist=False,
-        back_populates="juguete",
-        cascade="all, delete-orphan",
-    )
+    usuario = relationship(
+        "Usuario"
+    )  # Opcional: si quieres acceder al usuario desde el juguete

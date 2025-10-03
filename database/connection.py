@@ -1,20 +1,14 @@
-"""
-Creación de engine, Session y Base para SQLAlchemy ORM.
-Se usa UUID como tipo primario para PostgreSQL.
-"""
-
-import uuid
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, declarative_base
-from database.config import settings
-from sqlalchemy.pool import NullPool
+from sqlalchemy.orm import sessionmaker
 
-engine = create_engine(
-    settings.DATABASE_URL,
-    echo=False,
-    poolclass=NullPool,
-)
+from database.config import DATABASE_URL
 
-SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
+engine = create_engine(DATABASE_URL)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-Base = declarative_base()
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()

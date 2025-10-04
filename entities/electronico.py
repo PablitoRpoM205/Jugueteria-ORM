@@ -1,30 +1,15 @@
-"""
-Entidad Electronico: subtipo de juguete con datos adicionales.
-Relación 1:1 con juguetes mediante juguete_id.
-"""
-
-import uuid
-from sqlalchemy import Column, Integer, ForeignKey
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
-from database.connection import Base
-from entities.base import AuditMixin
+from entities.base import Base
 
+class Electronico(Base):
+    __tablename__ = 'electronicos'
 
-class Electronico(Base, AuditMixin):
-    """
-    Tabla electronicos con referencia al juguete padre.
-    """
+    id = Column(Integer, primary_key=True, index=True)
+    nombre = Column(String, index=True)
+    precio = Column(Integer)
+    stock = Column(Integer)
+    tipo = Column(String, default="electronico")
+    usuario_id = Column(Integer, ForeignKey('usuarios.id'))
 
-    __tablename__ = "electronicos"
-
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    juguete_id = Column(
-        UUID(as_uuid=True),
-        ForeignKey("juguetes.id", ondelete="CASCADE"),
-        nullable=False,
-        unique=True,
-    )
-    garantia_meses = Column(Integer, nullable=False, default=12)
-
-    juguete = relationship("Juguete", back_populates="electronico", uselist=False)
+    usuario = relationship("Usuario", back_populates="electronicos")

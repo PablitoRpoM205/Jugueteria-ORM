@@ -1,141 +1,36 @@
-"""
-Operaciones para juguetes e inventario.
-"""
-
 from sqlalchemy.orm import Session
 from entities.juguete import Juguete
-from entities.inventario import Inventario
-from entities.venta import Venta
-from entities.electronico import Electronico
-from entities.didactico import Didactico
-from entities.coleccionable import Coleccionable
+from crud.usuario_crud import obtener_usuario_por_id
 
-
-def crear_juguete(
-    db: Session, nombre: str, precio: float, stock: int, tipo: str, actor_id
-):
-    """
-    Crea un juguete nuevo.
-    """
-    nuevo = Juguete(
-        nombre=nombre,
-        precio=precio,
-        stock=stock,
-        tipo=tipo,
-        id_usuario_creacion=actor_id,
-        id_usuario_edicion=actor_id,
-    )
-    db.add(nuevo)
+def crear_juguete(db: Session, nombre: str, precio: float, stock: int, tipo: str, usuario_id: int):
+    nuevo_juguete = Juguete(nombre=nombre, precio=precio, stock=stock, tipo=tipo, usuario_id=usuario_id)
+    db.add(nuevo_juguete)
     db.commit()
-    db.refresh(nuevo)
-
-    if tipo == "electronico":
-        electronico = Electronico(
-            juguete_id=nuevo.id,
-            id_usuario_creacion=actor_id,
-            id_usuario_edicion=actor_id,
-        )
-        db.add(electronico)
-    elif tipo == "didactico":
-        didactico = Didactico(
-            juguete_id=nuevo.id,
-            id_usuario_creacion=actor_id,
-            id_usuario_edicion=actor_id,
-        )
-        db.add(didactico)
-    elif tipo == "coleccionable":
-        coleccionable = Coleccionable(
-            juguete_id=nuevo.id,
-            id_usuario_creacion=actor_id,
-            id_usuario_edicion=actor_id,
-        )
-        db.add(coleccionable)
-
-    inventario = Inventario(
-        usuario_id=actor_id,
-        juguete_id=nuevo.id,
-        cantidad=stock,
-        id_usuario_creacion=actor_id,
-        id_usuario_edicion=actor_id,
-    )
-    db.add(inventario)
-
-    db.commit()
-    return nuevo
-
+    db.refresh(nuevo_juguete)
+    return nuevo_juguete
 
 def obtener_juguetes(db: Session):
-    """
-    Retorna todos los juguetes.
-    """
-    return db.query(Juguete).order_by(Juguete.nombre).all()
+    return db.query(Juguete).all()
 
+def obtener_juguete_por_id(db: Session, juguete_id: int):
+    return db.query(Juguete).filter(Juguete.id == juguete_id).first()
 
-def buscar_juguete_por_nombre(db: Session, nombre: str):
-    return db.query(Juguete).filter(Juguete.nombre.ilike(f"%{nombre}%")).all()
-
-
-def vender_juguete(db: Session, juguete_id, usuario_id_vendio, cantidad: int):
-    juguete = db.get(Juguete, juguete_id)
-    if not juguete:
-        return False, "Juguete no encontrado."
-
-    if cantidad <= 0 or cantidad > juguete.stock:
-        return False, "Stock insuficiente."
-
-    precio_unitario = juguete.precio
-    total = precio_unitario * cantidad
-    juguete.stock -= cantidad
-    venta = Venta(
-        usuario_id_vendio=usuario_id_vendio,
-        juguete_id=juguete.id,
-        cantidad=cantidad,
-        precio_unitario=precio_unitario,
-        total=total,
-        id_usuario_creacion=usuario_id_vendio,
-        id_usuario_edicion=usuario_id_vendio,
-    )
-    db.add(venta)
-    db.commit()
-    db.refresh(venta)
-    return True, venta
-
-
-def aplicar_descuento(db: Session, juguete_id, porcentaje: int, actor_id=None):
-    juguete = db.get(Juguete, juguete_id)
-    if not juguete:
-        return False, "Juguete no encontrado."
-
-    limites = {"electronico": 20, "didactico": 15, "coleccionable": 4}
-    max_desc = limites.get(juguete.tipo.lower(), 10)
-    aplicado = porcentaje
-    mensaje = None
-    if porcentaje > max_desc:
-        aplicado = max_desc
-        mensaje = f"Se aplicó el máximo de {max_desc}% para tipo {juguete.tipo}."
-
-    juguete.precio = juguete.precio * (1 - aplicado / 100)
-    juguete.id_usuario_edicion = actor_id
-    db.commit()
-    db.refresh(juguete)
-    if mensaje:
-        return True, mensaje
-    return True, f"Descuento aplicado: {aplicado}%. Nuevo precio: {juguete.precio:.2f}"
-
+def actualizar_juguete(db: Session, juguete_id: int, nombre: str, precio: float, stock: int, tipo: str):
+    juguete = obtener_juguete_por_id(db, juguete_id)
+    if juguete:
+        juguete.nombre = nombre
+        juguete.precio = precio
+        juguete.stock = stock
+        juguete.tipo = tipo
+        db.commit()
+        db.refresh(juguete)
+        return juguete
+    return None
 
 def eliminar_juguete(db: Session, juguete_id: int):
-    """
-    Elimina un juguete por su ID si no tiene ventas asociadas.
-    """
-    juguete = db.get(Juguete, juguete_id)
-    if not juguete:
-        return False, "Juguete no encontrado."
-    ventas = db.query(Venta).filter(Venta.juguete_id == juguete_id).count()
-    if ventas > 0:
-        return (
-            False,
-            "No se puede eliminar: ya existen ventas asociadas a este juguete.",
-        )
-    db.delete(juguete)
-    db.commit()
-    return True, f"Juguete '{juguete.nombre}' eliminado correctamente."
+    juguete = obtener_juguete_por_id(db, juguete_id)
+    if juguete:
+        db.delete(juguete)
+        db.commit()
+        return True
+    return False

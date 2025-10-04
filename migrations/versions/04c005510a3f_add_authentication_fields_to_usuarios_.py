@@ -1,36 +1,23 @@
-"""Add authentication fields to usuarios only
-
-Revision ID: 04c005510a3f
-Revises:
-Create Date: 2025-09-16 17:43:27.024464
-
-"""
-
-import sqlalchemy as sa
 from alembic import op
+import sqlalchemy as sa
 
-revision = "04c005510a3f"
+
+# revision identifiers, used by Alembic.
+revision = '04c005510a3f'
 down_revision = None
 branch_labels = None
 depends_on = None
 
 
-def upgrade() -> None:
-    op.add_column(
-        "usuarios", sa.Column("nombre_usuario", sa.String(length=50), nullable=True)
-    )
-    op.add_column(
-        "usuarios", sa.Column("contrasena_hash", sa.String(length=255), nullable=True)
-    )
-    op.add_column("usuarios", sa.Column("es_admin", sa.Boolean(), nullable=True))
-
-    op.create_index(
-        op.f("ix_usuarios_nombre_usuario"), "usuarios", ["nombre_usuario"], unique=True
-    )
+def upgrade():
+    # Add authentication fields to usuarios table
+    op.add_column('usuarios', sa.Column('correo', sa.String(length=255), nullable=False))
+    op.add_column('usuarios', sa.Column('hashed_password', sa.String(length=255), nullable=False))
+    op.add_column('usuarios', sa.Column('rol', sa.String(length=50), nullable=False))
 
 
-def downgrade() -> None:
-    op.drop_index(op.f("ix_usuarios_nombre_usuario"), table_name="usuarios")
-    op.drop_column("usuarios", "es_admin")
-    op.drop_column("usuarios", "contrasena_hash")
-    op.drop_column("usuarios", "nombre_usuario")
+def downgrade():
+    # Remove authentication fields from usuarios table
+    op.drop_column('usuarios', 'correo')
+    op.drop_column('usuarios', 'hashed_password')
+    op.drop_column('usuarios', 'rol')

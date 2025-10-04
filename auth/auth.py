@@ -1,32 +1,40 @@
-"""
-Módulo de autenticación con funciones de login y registro en consola.
-"""
-
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
+from crud.usuario_crud import crear_usuario, buscar_usuario_por_username
 from sqlalchemy.orm import Session
-from crud.usuario_crud import crear_usuario, autenticar, listar_usuarios
+from database.connection import SessionLocal
 
+router = APIRouter()
 
-def registrar_usuario_console(db: Session):
-    username = input("Nombre de usuario: ").strip()
-    password = input("Contraseña (mín 6 caracteres): ").strip()
-    rol = input("Rol (admin/usuario): ").strip()
-    if len(password) < 6:
-        print("La contraseña debe tener al menos 6 caracteres.")
-        return None
-    user = crear_usuario(db, username, password, rol)
-    print(f"Usuario creado: {user.nombre_usuario} ({user.correo})")
-    return user
+class UsuarioBase(BaseModel):
+    nombre: str
+    correo: str
+    contraseña: str
 
+class UsuarioCreate(UsuarioBase):
+    pass
 
-def login_console(db: Session):
-    """
-    Login por consola. Devuelve la instancia de usuario autenticado o None.
-    """
-    username = input("Nombre de usuario: ").strip()
-    password = input("Contraseña: ").strip()
-    user = autenticar(db, username, password)
-    if not user:
-        print("Credenciales inválidas.")
-        return None
-    print(f"Bienvenido {user.nombre_usuario}!")
-    return user
+class Usuario(UsuarioBase):
+    id: int
+
+    class Config:
+        orm_mode = True
+
+@router.post("/register", response_model=Usuario)
+def register_usuario(usuario: UsuarioCreate):
+    db: Session = SessionLocal()
+    db_usuario = buscar_usuario_por_username(db, usuario.correo)
+    if db_usuario:
+        raise HTTPException(status_code=400, detail="Usuario ya existe")
+    nuevo_usuario = crear_usuario(db, usuario.nombre, usuario.correo, usuario.contraseña)
+    return nuevo_usuario
+
+@router.post("/login")
+def login_usuario(usuario: UsuarioBase):
+    db: Session = SessionLocal()
+    db_usuario = buscar_usuario_por_username(db, usuario.correo)
+    if not db_usuario or db_usuario.contraseña != usuario.contraseña:
+        raise HTTPException(status_code=400, detail="Credenciales incorrectas")
+    return {"message": "Inicio de sesión exitoso", "usuario": db_usuario.nombre}
+
+# Aquí se pueden agregar más endpoints relacionados con la autenticación según sea necesario.

@@ -1,67 +1,63 @@
-"""
-Operaciones CRUD para usuarios.
-"""
-
 from sqlalchemy.orm import Session
 from entities.usuario import Usuario
-import uuid
-import hashlib
-import random
 
 
-def hash_password(password: str) -> str:
-    """
-    Hashea una contraseña usando SHA256.
-    """
-    return hashlib.sha256(password.encode("utf-8")).hexdigest()
-
-
-def crear_usuario(db: Session, username: str, password: str, rol: str, actor_id=None):
-    """
-    Crea un nuevo usuario en la base de datos.
-    """
-    nuevo = Usuario(
-        id=uuid.uuid4(),
-        nombre=username,
-        nombre_usuario=username,
-        correo=f"{username}@jugueteria.com",
-        contraseña_hash=hash_password(password),
-        telefono=random.randint(3000000000, 3999999999),
-        es_admin=(rol == "admin"),
-        id_usuario_creacion=(
-            actor_id if actor_id else uuid.UUID("00000000-0000-0000-0000-000000000001")
-        ),
-        id_usuario_edicion=(
-            actor_id if actor_id else uuid.UUID("00000000-0000-0000-0000-000000000001")
-        ),
-    )
-    db.add(nuevo)
+def crear_usuario(db: Session, nombre: str, correo: str, contrasena: str):
+    usuario = Usuario(nombre=nombre, correo=correo, contrasena=contrasena)
+    db.add(usuario)
     db.commit()
-    db.refresh(nuevo)
-    return nuevo
+    db.refresh(usuario)
+    return usuario
 
 
-def buscar_usuario_por_username(db: Session, username: str):
-    """
-    Busca un usuario por su nombre de usuario.
-    """
-    return db.query(Usuario).filter(Usuario.nombre_usuario == username).first()
+def obtener_usuario(db: Session, usuario_id: int):
+    return db.query(Usuario).filter(Usuario.id == usuario_id).first()
 
 
-def autenticar(db: Session, username: str, password: str):
-    """
-    Verifica credenciales de acceso.
-    """
-    usuario = buscar_usuario_por_username(db, username)
-    if not usuario:
-        return None
-    if usuario.contraseña_hash == hash_password(password):
-        return usuario
-    return None
+def actualizar_usuario(db: Session, usuario_id: int, usuario_data: dict):
+    usuario = db.query(Usuario).filter(Usuario.id == usuario_id).first()
+    if usuario:
+        for key, value in usuario_data.items():
+            setattr(usuario, key, value)
+        db.commit()
+        db.refresh(usuario)
+    return usuario
+
+
+def eliminar_usuario(db: Session, usuario_id: int):
+    usuario = db.query(Usuario).filter(Usuario.id == usuario_id).first()
+    if usuario:
+        db.delete(usuario)
+        db.commit()
+    return usuario
 
 
 def listar_usuarios(db: Session):
-    """
-    Devuelve todos los usuarios ordenados por nombre de usuario.
-    """
-    return db.query(Usuario).order_by(Usuario.username).all()
+    return db.query(Usuario).all()
+
+
+# Endpoints que usan las funciones anteriores
+def crear_usuario_endpoint(db: Session, usuario_data: dict):
+    return crear_usuario(
+        db, usuario_data["nombre"], usuario_data["correo"], usuario_data["contrasena"]
+    )
+
+
+def obtener_usuario_endpoint(db: Session, usuario_id: int):
+    return obtener_usuario(db, usuario_id)
+
+
+def obtener_usuario_por_id(db: Session, usuario_id: int):
+    return db.query(Usuario).filter(Usuario.id == usuario_id).first()
+
+
+def actualizar_usuario_endpoint(db: Session, usuario_id: int, usuario_data: dict):
+    return actualizar_usuario(db, usuario_id, usuario_data)
+
+
+def eliminar_usuario_endpoint(db: Session, usuario_id: int):
+    return eliminar_usuario(db, usuario_id)
+
+
+def buscar_usuario_por_username(db: Session, username: str):
+    return db.query(Usuario).filter(Usuario.nombre == username).first()

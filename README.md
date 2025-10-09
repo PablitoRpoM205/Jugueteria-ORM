@@ -1,118 +1,137 @@
 # Sistema de Gestión de Juguetería API
-Nuestro proyecto consiste en un Sistema de Gestión de Juguetería desarrollado en Python, ahora transformado en una API RESTful utilizando FastAPI. Esta aplicación permite manejar diferentes tipos de juguetes con sus respectivas reglas de negocio, conectándose a PostgreSQL usando Neon como base de datos en la nube, incluyendo migraciones con Alembic y operaciones CRUD básicas.
 
-## Descripción del Proyecto
-Este proyecto implementa un sistema de inventario para una juguetería que permite gestionar tres tipos diferentes de juguetes:
-- **Juguetes Electrónicos**: Con descuento máximo del 20%.
-- **Juguetes Didácticos**: Con descuento máximo del 15%.
-- **Juguetes Coleccionables**: Con descuento máximo del 4%.
+Este proyecto es una API RESTful desarrollada con **FastAPI** para la gestión de una juguetería. Permite administrar usuarios, inventario, ventas y diferentes tipos de juguetes, aplicando reglas de negocio específicas para cada tipo. Utiliza **PostgreSQL** (Neon en la nube), migraciones con **Alembic** y operaciones CRUD completas.
 
-Cada tipo de juguete tiene sus propias reglas de descuento y hereda funcionalidades básicas de la clase padre `Juguete`.
+## Descripción
+
+El sistema gestiona tres tipos de juguetes, cada uno con su propio límite de descuento:
+- **Electrónicos**: hasta 20%
+- **Didácticos**: hasta 15%
+- **Coleccionables**: hasta 4%
+
+Cada tipo hereda de la clase base `Juguete` y tiene reglas de negocio particulares.
 
 ## Características
 
-- Gestión de usuarios con autenticación y roles (admin/usuario).
-- CRUD de juguetes, con subtipos: electrónicos, didácticos y coleccionables.
-- Inventario por usuario.
-- Registro y consulta de ventas.
-- Aplicación de descuentos según tipo de juguete.
-- API RESTful con endpoints para cada entidad.
-- Migraciones de base de datos con Alembic.
+- Autenticación y roles (admin/usuario)
+- CRUD de usuarios, juguetes, ventas e inventario
+- Inventario por usuario
+- Registro y consulta de ventas
+- Aplicación de descuentos según tipo de juguete
+- Migraciones con Alembic
+- API RESTful modularizada por entidad
 
 ## Instalación
 
-1. **Clona el repositorio y entra en la carpeta del proyecto**.
+1. **Clona el repositorio y entra en la carpeta del proyecto:**
+   ```sh
+   git clone <url-del-repo>
+   cd Jugueteria-ORM
+   ```
 
-2. **Crea un entorno virtual e instálalo; con ello las dependencias:**
+2. **Crea un entorno virtual e instala las dependencias:**
    ```sh
    python -m venv venv
    source venv/bin/activate  # En Windows: venv\Scripts\activate
    pip install -r requirements.txt
    ```
 
-3. **Ejecuta el servidor de la API**:
+3. **Configura la base de datos en el archivo `.env`**  
+   (ya incluido en el proyecto, revisa la variable `DATABASE_URL`).
+
+4. **Ejecuta el servidor de la API:**
    ```sh
    uvicorn main:app --reload
    ```
 
 ## Uso de la API
 
-### Endpoints
+### Endpoints principales
 
 - **Usuarios**
-  - `POST /usuarios`: Crear un nuevo usuario.
-  - `GET /usuarios`: Obtener todos los usuarios.
-  - `GET /usuarios/{id}`: Obtener un usuario por ID.
-  - `PUT /usuarios/{id}`: Actualizar un usuario por ID.
-  - `DELETE /usuarios/{id}`: Eliminar un usuario por ID.
+  - `POST /usuarios` — Crear usuario
+  - `GET /usuarios` — Listar usuarios
+  - `GET /usuarios/{id}` — Obtener usuario por ID
+  - `PUT /usuarios/{id}` — Actualizar usuario
+  - `DELETE /usuarios/{id}` — Eliminar usuario
 
 - **Juguetes**
-  - `POST /juguetes`: Crear un nuevo juguete.
-  - `GET /juguetes`: Obtener todos los juguetes.
-  - `GET /juguetes/{id}`: Obtener un juguete por ID.
-  - `PUT /juguetes/{id}`: Actualizar un juguete por ID.
-  - `DELETE /juguetes/{id}`: Eliminar un juguete por ID.
+  - `POST /juguetes` — Crear juguete
+  - `GET /juguetes` — Listar juguetes
+  - `GET /juguetes/{id}` — Obtener juguete por ID
+  - `PUT /juguetes/{id}` — Actualizar juguete
+  - `DELETE /juguetes/{id}` — Eliminar juguete
 
 - **Ventas**
-  - `POST /ventas`: Crear una nueva venta.
-  - `GET /ventas`: Obtener todas las ventas.
-  - `GET /ventas/{id}`: Obtener una venta por ID.
-  - `PUT /ventas/{id}`: Actualizar una venta por ID.
-  - `DELETE /ventas/{id}`: Eliminar una venta por ID.
+  - `POST /ventas` — Registrar venta
+  - `GET /ventas` — Listar ventas
+  - `GET /ventas/{id}` — Obtener venta por ID
+  - `PUT /ventas/{id}` — Actualizar venta
+  - `DELETE /ventas/{id}` — Eliminar venta
 
 - **Inventario**
-  - `GET /inventario`: Obtener el inventario.
-  - `PUT /inventario`: Actualizar el inventario.
+  - `GET /inventario` — Consultar inventario
+  - `PUT /inventario` — Actualizar inventario
 
 - **Autenticación**
-  - `POST /auth/login`: Iniciar sesión.
-  - `POST /auth/register`: Registrar un nuevo usuario.
+  - `POST /auth/login` — Iniciar sesión
+  - `POST /auth/register` — Registrar usuario
 
-## Estructura del proyecto
+## Estructura del Proyecto
 
 ```
 .
 ├── api/
-│   ├── __init__.py
-│   ├── usuario.py
-│   ├── juguete.py
-│   ├── venta.py
+│   ├── auth.py
+│   ├── dependencias.py
 │   ├── inventario.py
-│   └── auth.py
+│   ├── juguete.py
+│   ├── usuario.py
+│   └── venta.py
 ├── auth/
 │   └── auth.py
 ├── crud/
-│   ├── usuario_crud.py
+│   ├── inventario_crud.py
 │   ├── juguete_crud.py
+│   ├── usuario_crud.py
 │   └── venta_crud.py
 ├── database/
-│   ├── __init__.py
 │   ├── config.py
 │   └── connection.py
 ├── entities/
 │   ├── base.py
-│   ├── usuario.py
-│   ├── juguete.py
-│   ├── inventario.py
-│   ├── venta.py
-│   ├── electronico.py
+│   ├── coleccionable.py
 │   ├── didactico.py
-│   └── coleccionable.py
+│   ├── electronico.py
+│   ├── inventario.py
+│   ├── juguete.py
+│   ├── usuario.py
+│   └── venta.py
 ├── migrations/
 │   ├── env.py
 │   ├── script.py.mako
 │   └── versions/
-│       └── 04c005510a3f_add_authentication_fields_to_usuarios_.py
+├── schemas/
+│   ├── inventario.py
+│   ├── juguete.py
+│   ├── usuario.py
+│   └── venta.py
+├── utils/
+│   ├── exceptions.py
+│   └── security.py
 ├── main.py
+├── init_db.py
 ├── requirements.txt
-├── test_connection.py
 ├── .env
-├── .gitignore
 ├── alembic.ini
+├── test_connection.py
 └── README.md
 ```
 
+¡Muchas gracias!
+
 ## Autores
+
 - Julián Esteban Álvarez Segura
 - Juan Pablo Restrepo Muñoz
 

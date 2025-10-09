@@ -1,6 +1,7 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
+from schemas.juguete import JugueteCreate, JugueteResponse
 from crud.juguete_crud import (
     crear_juguete,
     obtener_juguetes,
@@ -8,35 +9,16 @@ from crud.juguete_crud import (
     actualizar_juguete,
     eliminar_juguete,
 )
-from database.connection import SessionLocal
 from entities.juguete import Juguete
-from pydantic import BaseModel
+from api.dependencias import get_db
+from utils.exceptions import JugueteNoEncontrado, JugueteTieneRelaciones
 
 router = APIRouter()
 
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
-class JugueteSchema(BaseModel):
-    id: int | None = None
-    nombre: str
-    precio: float
-    stock: int
-    tipo: str
-    usuario_id: int
-
-    class Config:
-        orm_mode = True
-
-
-@router.post("/", response_model=JugueteSchema)
-def crear_juguete_endpoint(juguete: JugueteSchema, db: Session = Depends(get_db)):
+@router.post("/", response_model=JugueteResponse, status_code=201)
+def crear_juguete_endpoint(juguete: JugueteCreate, db: Session = Depends(get_db)):
+    """Crear un nuevo juguete"""
     try:
         nuevo_juguete = crear_juguete(
             db,
@@ -54,32 +36,46 @@ def crear_juguete_endpoint(juguete: JugueteSchema, db: Session = Depends(get_db)
         )
 
 
-@router.get("/", response_model=list[JugueteSchema])
+@router.get("/", response_model=list[JugueteResponse])
 def obtener_juguetes_endpoint(db: Session = Depends(get_db)):
+    """Listar todos los juguetes"""
     return obtener_juguetes(db)
 
 
-@router.get("/{juguete_id}", response_model=JugueteSchema)
+@router.get("/{juguete_id}", response_model=JugueteResponse)
 def obtener_juguete_endpoint(juguete_id: int, db: Session = Depends(get_db)):
+    """Obtener un juguete por ID"""
     juguete = obtener_juguete_por_id(db, juguete_id)
     if juguete is None:
-        raise HTTPException(status_code=404, detail="Juguete no encontrado")
+        raise JugueteNoEncontrado(juguete_id)
     return juguete
 
 
-@router.put("/{juguete_id}", response_model=JugueteSchema)
+@router.put("/{juguete_id}", response_model=JugueteResponse)
 def actualizar_juguete_endpoint(
-    juguete_id: int, juguete: JugueteSchema, db: Session = Depends(get_db)
+    juguete_id: int, juguete: JugueteCreate, db: Session = Depends(get_db)
 ):
-    actualizado = actualizar_juguete(db, juguete_id, juguete.dict(exclude_unset=True))
+    """Actualizar un juguete"""
+    actualizado = actualizar_juguete(
+        db, juguete_id, juguete.nombre, juguete.precio, juguete.stock, juguete.tipo
+    )
     if not actualizado:
-        raise HTTPException(status_code=404, detail="Juguete no encontrado")
+        raise JugueteNoEncontrado(juguete_id)
     return actualizado
 
 
-@router.delete("/{juguete_id}", response_model=dict)
+@router.delete("/{juguete_id}", status_code=204)
 def eliminar_juguete_endpoint(juguete_id: int, db: Session = Depends(get_db)):
+    """Eliminar un juguete"""
+    juguete = db.query(Juguete).filter(Juguete.id == juguete_id).first()
+    if not juguete:
+        raise JugueteNoEncontrado(juguete_id)
+
+    if juguete.inventario:
+        raise JugueteTieneRelaciones()
+
     eliminado = eliminar_juguete(db, juguete_id)
     if not eliminado:
-        raise HTTPException(status_code=404, detail="Juguete no encontrado")
-    return {"detail": "Juguete eliminado correctamente"}
+        raise JugueteNoEncontrado(juguete_id)
+
+    return None

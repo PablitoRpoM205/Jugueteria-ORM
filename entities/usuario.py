@@ -12,3 +12,5 @@ class Usuario(Base):
     contrasena = Column(String, nullable=False)
 
     ventas = relationship("Venta", back_populates="usuario")
+    juguetes = relationship("Juguete", back_populates="usuario")
+    inventario = relationship("Inventario", back_populates="usuario")

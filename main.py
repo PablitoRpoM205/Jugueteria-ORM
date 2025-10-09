@@ -7,13 +7,12 @@ from api.juguete import router as juguete_router
 from api.venta import router as venta_router
 from api.inventario import router as inventario_router
 from api.auth import router as auth_router
+from init_db import init_data
 
-# Crear la base de datos
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-# Configuración de CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -22,7 +21,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Incluir routers
+init_data()
+
 app.include_router(usuario_router, prefix="/usuarios", tags=["usuarios"])
 app.include_router(juguete_router, prefix="/juguetes", tags=["juguetes"])
 app.include_router(venta_router, prefix="/ventas", tags=["ventas"])

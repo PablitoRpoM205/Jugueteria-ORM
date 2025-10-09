@@ -1,6 +1,6 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from database.connection import SessionLocal
+from schemas.venta import VentaCreate, VentaResponse
 from crud.venta_crud import (
     crear_venta,
     obtener_ventas,
@@ -8,62 +8,58 @@ from crud.venta_crud import (
     actualizar_venta,
     eliminar_venta,
 )
-from pydantic import BaseModel
+from api.dependencias import get_db
+from utils.exceptions import VentaNoEncontrada, StockInsuficiente
 
 router = APIRouter()
 
 
-# Esquema Pydantic para Venta
-class VentaSchema(BaseModel):
-    id: int | None = None
-    usuario_id: int
-    juguete_id: int
-    cantidad: int
-
-    class Config:
-        orm_mode = True
-
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
-@router.get("/ventas", response_model=list[VentaSchema])
+@router.get("/", response_model=list[VentaResponse])
 def listar_ventas(db: Session = Depends(get_db)):
+    """Listar todas las ventas"""
     return obtener_ventas(db)
 
 
-@router.post("/ventas", response_model=VentaSchema)
-def crear_venta_endpoint(venta: VentaSchema, db: Session = Depends(get_db)):
-    nueva_venta = crear_venta(db, venta.usuario_id, venta.juguete_id, venta.cantidad)
-    return nueva_venta
+@router.post("/", response_model=VentaResponse, status_code=201)
+def crear_venta_endpoint(venta: VentaCreate, db: Session = Depends(get_db)):
+    """Crear una nueva venta"""
+    try:
+        nueva_venta = crear_venta(
+            db, venta.juguete_id, venta.cantidad, venta.usuario_id
+        )
+        return nueva_venta
+    except ValueError as e:
+        if "stock insuficiente" in str(e).lower():
+            raise StockInsuficiente()
+        raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.get("/ventas/{venta_id}", response_model=VentaSchema)
+@router.get("/{venta_id}", response_model=VentaResponse)
 def obtener_venta_endpoint(venta_id: int, db: Session = Depends(get_db)):
+    """Obtener una venta por ID"""
     venta = obtener_venta_por_id(db, venta_id)
     if not venta:
-        raise HTTPException(status_code=404, detail="Venta no encontrada")
+        raise VentaNoEncontrada()
     return venta
 
 
-@router.put("/ventas/{venta_id}", response_model=VentaSchema)
+@router.put("/{venta_id}", response_model=VentaResponse)
 def actualizar_venta_endpoint(
-    venta_id: int, venta: VentaSchema, db: Session = Depends(get_db)
+    venta_id: int, venta: VentaCreate, db: Session = Depends(get_db)
 ):
-    venta_actualizada = actualizar_venta(db, venta_id, venta)
+    """Actualizar una venta"""
+    venta_actualizada = actualizar_venta(
+        db, venta_id, venta.usuario_id, venta.juguete_id, venta.cantidad
+    )
     if not venta_actualizada:
-        raise HTTPException(status_code=404, detail="Venta no encontrada")
+        raise VentaNoEncontrada()
     return venta_actualizada
 
 
-@router.delete("/ventas/{venta_id}", response_model=dict)
+@router.delete("/{venta_id}", status_code=204)
 def eliminar_venta_endpoint(venta_id: int, db: Session = Depends(get_db)):
+    """Eliminar una venta"""
     eliminado = eliminar_venta(db, venta_id)
     if not eliminado:
-        raise HTTPException(status_code=404, detail="Venta no encontrada")
-    return {"detail": "Venta eliminada correctamente"}
+        raise VentaNoEncontrada()
+    return None

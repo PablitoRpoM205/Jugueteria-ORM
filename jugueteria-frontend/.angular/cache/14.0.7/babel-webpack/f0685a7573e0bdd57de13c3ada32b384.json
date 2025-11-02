@@ -1,0 +1,1 @@
+{"ast":null,"code":"export const environment = {\n  production: false,\n  apiUrl: 'http://localhost:8000' // URL de la API de gestión de juguetería\n\n};","map":null,"metadata":{},"sourceType":"module"}

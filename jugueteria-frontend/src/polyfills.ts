@@ -1,0 +1,1 @@
+// This file includes polyfills needed for browser compatibility.

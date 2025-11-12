@@ -12,23 +12,23 @@ export class JuguetesService {
 
   constructor(private http: HttpClient) { }
 
-  getJuguetes(): Observable<Juguete[]> {
+  obtenerJuguetes(): Observable<Juguete[]> {
     return this.http.get<Juguete[]>(this.apiUrl);
   }
 
-  getJugueteById(id: number): Observable<Juguete> {
+  obtenerJuguetePorId(id: number): Observable<Juguete> {
     return this.http.get<Juguete>(`${this.apiUrl}/${id}`);
   }
 
-  createJuguete(juguete: Juguete): Observable<Juguete> {
+  crearJuguete(juguete: Juguete): Observable<Juguete> {
     return this.http.post<Juguete>(this.apiUrl, juguete);
   }
 
-  updateJuguete(id: number, juguete: Juguete): Observable<Juguete> {
+  actualizarJuguete(id: number, juguete: Juguete): Observable<Juguete> {
     return this.http.put<Juguete>(`${this.apiUrl}/${id}`, juguete);
   }
 
-  deleteJuguete(id: number): Observable<void> {
+  eliminarJuguete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 }

@@ -1,6 +1,6 @@
 export interface Inventario {
     id: number;
-    jugueteId: number;
-    usuarioId: number;
-    cantidad: number;
+    juguete_id: number | null;
+    usuario_id: number | null;
+    cantidad: number | null;
 }

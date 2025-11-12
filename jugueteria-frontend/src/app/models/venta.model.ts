@@ -1,8 +1,6 @@
 export interface Venta {
     id: number;
-    usuarioId: number;
-    jugueteId: number;
-    cantidad: number;
-    fecha: Date;
-    total: number;
+    usuario_id: number | null;
+    juguete_id: number | null;
+    cantidad: number | null;
 }

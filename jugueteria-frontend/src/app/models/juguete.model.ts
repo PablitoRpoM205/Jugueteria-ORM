@@ -1,8 +1,8 @@
 export interface Juguete {
-    id?: number;
+    id: number;
     nombre: string;
-    precio: number;
-    stock: number;
+    precio: number | null;
+    stock: number | null;
     tipo: string;
     usuario_id?: number;
 }

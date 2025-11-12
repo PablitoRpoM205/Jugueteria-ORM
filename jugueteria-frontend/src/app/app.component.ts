@@ -7,4 +7,12 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
   title = 'jugueteria-frontend';
+  sidebarCollapsed = true;
+
+  toggleSidebar() {
+    this.sidebarCollapsed = !this.sidebarCollapsed;
+  }
+  isMobile(): boolean {
+    return window.innerWidth <= 991;
+  }
 }

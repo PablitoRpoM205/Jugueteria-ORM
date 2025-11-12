@@ -1,0 +1,17 @@
+<div class="wrapper">
+  <button class="menu-toggle" (click)="toggleSidebar()">
+    <i class="fas fa-bars"></i>
+  </button>
+  <div class="overlay" [class.active]="!sidebarCollapsed" (click)="toggleSidebar()">
+  </div>
+
+  <div class="sidebar" [class.collapsed]="sidebarCollapsed">
+    <app-sidebar (sidebarClosed)="toggleSidebar()"></app-sidebar>
+  </div>
+
+  <div class="main-panel" [class.expanded]="sidebarCollapsed">
+    <div class="content">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+</div>

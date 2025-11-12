@@ -1,0 +1,43 @@
+.container {
+    max-width: 600px;
+    margin: auto;
+    padding: 20px;
+    text-align: center;
+}
+
+.form-grid {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+input,
+button {
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #aaa;
+}
+
+button {
+    cursor: pointer;
+}
+
+.lista {
+    list-style: none;
+    padding: 0;
+}
+
+.lista li {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 8px;
+    border-bottom: 1px solid #ddd;
+}
+
+.btn-delete {
+    background: red;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+}

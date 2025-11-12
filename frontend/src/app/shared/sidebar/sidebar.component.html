@@ -1,0 +1,33 @@
+<button class="close-btn" (click)="closeSidebar()" [title]="collapsed ? 'Abrir sidebar' : 'Cerrar sidebar'">
+    <i class="fas" [class.fa-bars]="collapsed" [class.fa-times]="!collapsed"></i>
+</button>
+
+<div class="sidebar-header">
+    <div class="logo">
+        <span class="logo-icon">ITM</span>
+        <span class="logo-text">Juguetería</span>
+    </div>
+</div>
+
+<ul class="nav">
+    <li routerLink="/dashboard" routerLinkActive="active">
+        <i class="fas fa-home"></i>
+        <span>Dashboard</span>
+    </li>
+    <li routerLink="/juguetes" routerLinkActive="active">
+        <i class="fas fa-gamepad"></i>
+        <span>Juguetes</span>
+    </li>
+    <li routerLink="/usuarios" routerLinkActive="active">
+        <i class="fas fa-users"></i>
+        <span>Usuarios</span>
+    </li>
+    <li routerLink="/inventario" routerLinkActive="active">
+        <i class="fas fa-box"></i>
+        <span>Inventario</span>
+    </li>
+    <li routerLink="/ventas" routerLinkActive="active">
+        <i class="fas fa-shopping-cart"></i>
+        <span>Ventas</span>
+    </li>
+</ul>

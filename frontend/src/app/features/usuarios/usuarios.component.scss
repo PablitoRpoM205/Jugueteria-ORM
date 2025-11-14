@@ -459,3 +459,146 @@ table {
         opacity: 1;
     }
 }
+
+.checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    background: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    min-width: 180px;
+
+    .checkbox-label {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        user-select: none;
+        width: 100%;
+
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            cursor: pointer;
+            accent-color: #b49cda;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+
+            &:hover {
+                border-color: #b49cda;
+            }
+
+            &:checked {
+                background-color: #b49cda;
+            }
+        }
+
+        span {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #333;
+            font-family: 'Poppins', sans-serif;
+        }
+    }
+}
+
+.badge {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-align: center;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+
+    &.badge-admin {
+        background: linear-gradient(135deg, #b49cda, #9c27b0);
+        color: white;
+        box-shadow: 0 2px 8px rgba(180, 156, 218, 0.4);
+
+        &:hover {
+            box-shadow: 0 4px 12px rgba(180, 156, 218, 0.6);
+            transform: translateY(-1px);
+        }
+    }
+
+    &.badge-user {
+        background: #e0e0e0;
+        color: #666;
+
+        &:hover {
+            background: #d5d5d5;
+        }
+    }
+}
+
+.modal {
+    .checkbox-wrapper {
+        margin: 15px 0 20px 0;
+        padding: 12px 15px;
+        background: #f5f5f5;
+        border-radius: 8px;
+        border: 2px solid #e0e0e0;
+
+        &:hover {
+            border-color: #b49cda;
+            background: #faf8fc;
+        }
+    }
+}
+
+.resultado-card {
+    .resultado-body {
+        p {
+            margin: 0.75rem 0;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+
+            strong {
+                min-width: 80px;
+                color: #333;
+            }
+
+            .badge {
+                margin-left: 0;
+            }
+        }
+    }
+}
+
+@media (max-width: 768px) {
+    .nuevo-form {
+        .checkbox-wrapper {
+            flex-basis: 100%;
+            min-width: 100%;
+        }
+    }
+
+    .badge {
+        font-size: 10px;
+        padding: 4px 10px;
+    }
+}
+
+@keyframes badgePulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+.badge-admin {
+    animation: badgePulse 2s ease-in-out infinite;
+}

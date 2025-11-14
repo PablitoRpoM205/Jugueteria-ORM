@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { Router, RouterModule, NavigationEnd } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
@@ -31,6 +30,7 @@ export class SidebarComponent implements OnInit {
     @Output() sidebarClosed = new EventEmitter<void>();
     sidebarCollapsed = false;
     menuItems: RouteInfo[] = [];
+    currentUser: any = null;
 
     constructor(
         public authService: AuthService,
@@ -38,6 +38,10 @@ export class SidebarComponent implements OnInit {
     ) { }
 
     ngOnInit() {
+        this.authService.currentUser$.subscribe(user => {
+            this.currentUser = user;
+        });
+
         this.menuItems = ROUTES;
         this.router.events.pipe(
             filter(event => event instanceof NavigationEnd)
@@ -47,7 +51,7 @@ export class SidebarComponent implements OnInit {
             }
         });
 
-        console.log('✅ Menu items cargados:', this.menuItems);
+        console.log('Menu items cargados:', this.menuItems);
 
     }
     isMobileMenu() {

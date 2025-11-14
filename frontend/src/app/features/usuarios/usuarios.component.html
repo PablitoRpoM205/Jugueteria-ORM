@@ -17,6 +17,7 @@
     </div>
 </div>
 
+<!-- Resultado de búsqueda -->
 <div *ngIf="resultadoBusqueda" class="resultado-card fade-in">
     <div class="resultado-header">
         <h3>{{ resultadoBusqueda.nombre }}</h3>
@@ -26,19 +27,38 @@
         <p><strong>ID:</strong> {{ resultadoBusqueda.id }}</p>
         <p><strong>Nombre:</strong> {{ resultadoBusqueda.nombre }}</p>
         <p><strong>Correo:</strong> {{ resultadoBusqueda.correo }}</p>
+        <!-- ✅ CORREGIDO: es_admin con badge -->
+        <p>
+            <strong>Rol:</strong>
+            <span class="badge" [class.badge-admin]="resultadoBusqueda.es_admin"
+                [class.badge-user]="!resultadoBusqueda.es_admin">
+                {{ resultadoBusqueda.es_admin ? 'Administrador' : 'Usuario' }}
+            </span>
+        </p>
     </div>
 </div>
 
 <div class="tabla-container">
     <h2>Gestión de Usuarios</h2>
 
+    <!-- ✅ FORMULARIO CORREGIDO -->
     <div class="nuevo-form">
         <input type="text" placeholder="Nombre del usuario" [(ngModel)]="nuevo.nombre" name="nombre">
-        <input type="email" placeholder="Correo" [(ngModel)]="nuevo.correo" name="Correo">
+        <input type="email" placeholder="Correo" [(ngModel)]="nuevo.correo" name="correo">
         <input type="password" placeholder="Contraseña" [(ngModel)]="nuevo.contrasena" name="contrasena">
+
+        <!-- ✅ CHECKBOX para es_admin -->
+        <div class="checkbox-wrapper">
+            <label class="checkbox-label">
+                <input type="checkbox" [(ngModel)]="nuevo.es_admin" name="es_admin">
+                <span>¿Es Administrador?</span>
+            </label>
+        </div>
+
         <button class="btn-crear" (click)="crear()">Crear Usuario</button>
     </div>
 
+    <!-- ✅ TABLA CORREGIDA -->
     <div class="grid-wrapper">
         <table>
             <thead>
@@ -46,12 +66,13 @@
                     <th>ID</th>
                     <th>Nombre</th>
                     <th>Correo</th>
+                    <th>Rol</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
             <tbody>
                 <tr *ngIf="usuarios.length === 0">
-                    <td colspan="4" style="text-align: center; padding: 2rem; color: #999;">
+                    <td colspan="5" style="text-align: center; padding: 2rem; color: #999;">
                         No hay usuarios registrados
                     </td>
                 </tr>
@@ -59,6 +80,13 @@
                     <td>{{ usuario.id }}</td>
                     <td>{{ usuario.nombre }}</td>
                     <td>{{ usuario.correo }}</td>
+                    <!-- ✅ BADGE VISUAL -->
+                    <td>
+                        <span class="badge" [class.badge-admin]="usuario.es_admin"
+                            [class.badge-user]="!usuario.es_admin">
+                            {{ usuario.es_admin ? 'Admin' : 'Usuario' }}
+                        </span>
+                    </td>
                     <td>
                         <div class="actions">
                             <button class="btn-edit" title="Editar" (click)="editar(usuario)">
@@ -74,6 +102,7 @@
         </table>
     </div>
 
+    <!-- Paginación -->
     <div class="pagination" *ngIf="usuarios.length > 0">
         <button class="pagination-btn" (click)="previousPage()" [disabled]="currentPage === 1">
             ‹
@@ -94,6 +123,7 @@
     </div>
 </div>
 
+<!-- ✅ MODAL CORREGIDO -->
 <div class="modal-backdrop" *ngIf="editando">
     <div class="modal">
         <h3><i class="fa-solid fa-pen-to-square"></i> Editar Usuario</h3>
@@ -103,10 +133,18 @@
             <input [(ngModel)]="editando.nombre" name="nombre" required />
 
             <label>Correo</label>
-            <input [(ngModel)]="editando.correo" name="correo" type="correo" required />
+            <input [(ngModel)]="editando.correo" name="correo" type="email" required />
 
             <label>Contraseña (opcional, dejar vacío si no se cambia)</label>
-            <input [(ngModel)]="editando.contrasena" name="contrasena" type="contrasena" />
+            <input [(ngModel)]="editando.contrasena" name="contrasena" type="password" />
+
+            <!-- ✅ CHECKBOX en el modal -->
+            <div class="checkbox-wrapper">
+                <label class="checkbox-label">
+                    <input type="checkbox" [(ngModel)]="editando.es_admin" name="es_admin">
+                    <span>¿Es Administrador?</span>
+                </label>
+            </div>
 
             <div class="modal-actions">
                 <button type="submit" class="btn-save">

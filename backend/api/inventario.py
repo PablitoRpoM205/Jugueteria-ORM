@@ -11,12 +11,16 @@ from entities.juguete import Juguete
 from entities.usuario import Usuario
 from api.dependencias import get_db
 from utils.exceptions import InventarioNoEncontrado
+from api.auth_middleware import get_current_user, get_current_admin
 
 router = APIRouter()
 
 
 @router.get("/", response_model=list[InventarioResponse])
-def listar_inventario(db: Session = Depends(get_db)):
+def listar_inventario(
+    db: Session = Depends(get_db),
+    admin: Usuario = Depends(get_current_admin),
+):
     """Listar todo el inventario"""
     inventario = db.query(Inventario).options(joinedload(Inventario.juguete)).all()
     return inventario
@@ -24,7 +28,9 @@ def listar_inventario(db: Session = Depends(get_db)):
 
 @router.post("/", response_model=InventarioResponse)
 def crear_inventario_endpoint(
-    inventario: InventarioCreate, db: Session = Depends(get_db)
+    inventario: InventarioCreate,
+    db: Session = Depends(get_db),
+    admin: Usuario = Depends(get_current_admin),
 ):
     juguete = db.query(Juguete).filter(Juguete.id == inventario.juguete_id).first()
     if not juguete:
@@ -55,6 +61,7 @@ def modificar_inventario(
     inventario_id: int,
     inventario: InventarioCreate,
     db: Session = Depends(get_db),
+    admin: Usuario = Depends(get_current_admin),
 ):
     """Actualizar un registro de inventario"""
     actualizado = actualizar_inventario(

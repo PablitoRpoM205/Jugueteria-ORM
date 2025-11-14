@@ -3,9 +3,13 @@ from entities.usuario import Usuario
 from utils.security import hash_password
 
 
-def crear_usuario(db: Session, nombre: str, correo: str, contrasena: str):
+def crear_usuario(
+    db: Session, nombre: str, correo: str, contrasena: str, es_admin: bool
+):
     hashed = hash_password(contrasena)
-    usuario = Usuario(nombre=nombre, correo=correo, contrasena=hashed)
+    usuario = Usuario(
+        nombre=nombre, correo=correo, contrasena=hashed, es_admin=es_admin
+    )
     db.add(usuario)
     db.commit()
     db.refresh(usuario)

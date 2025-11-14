@@ -5,6 +5,7 @@ import re
 class UsuarioBase(BaseModel):
     nombre: str = Field(..., min_length=2, max_length=50)
     correo: EmailStr
+    es_admin: bool = False
 
     @validator("nombre")
     def validar_nombre(cls, v: str) -> str:

@@ -12,12 +12,18 @@ from crud.juguete_crud import (
 from entities.juguete import Juguete
 from api.dependencias import get_db
 from utils.exceptions import JugueteNoEncontrado, JugueteTieneRelaciones
+from api.auth_middleware import get_current_user, get_current_admin
+from entities.usuario import Usuario
 
 router = APIRouter()
 
 
 @router.post("/", response_model=JugueteResponse, status_code=201)
-def crear_juguete_endpoint(juguete: JugueteCreate, db: Session = Depends(get_db)):
+def crear_juguete_endpoint(
+    juguete: JugueteCreate,
+    db: Session = Depends(get_db),
+    admin: Usuario = Depends(get_current_admin),
+):
     """Crear un nuevo juguete"""
     try:
         nuevo_juguete = crear_juguete(
@@ -37,13 +43,19 @@ def crear_juguete_endpoint(juguete: JugueteCreate, db: Session = Depends(get_db)
 
 
 @router.get("/", response_model=list[JugueteResponse])
-def obtener_juguetes_endpoint(db: Session = Depends(get_db)):
+def obtener_juguetes_endpoint(
+    db: Session = Depends(get_db), usuario_actual: Usuario = Depends(get_current_user)
+):
     """Listar todos los juguetes"""
     return obtener_juguetes(db)
 
 
 @router.get("/{juguete_id}", response_model=JugueteResponse)
-def obtener_juguete_endpoint(juguete_id: int, db: Session = Depends(get_db)):
+def obtener_juguete_endpoint(
+    juguete_id: int,
+    db: Session = Depends(get_db),
+    admin: Usuario = Depends(get_current_admin),
+):
     """Obtener un juguete por ID"""
     juguete = obtener_juguete_por_id(db, juguete_id)
     if juguete is None:
@@ -53,7 +65,10 @@ def obtener_juguete_endpoint(juguete_id: int, db: Session = Depends(get_db)):
 
 @router.put("/{juguete_id}", response_model=JugueteResponse)
 def actualizar_juguete_endpoint(
-    juguete_id: int, juguete: JugueteCreate, db: Session = Depends(get_db)
+    juguete_id: int,
+    juguete: JugueteCreate,
+    db: Session = Depends(get_db),
+    admin: Usuario = Depends(get_current_admin),
 ):
     """Actualizar un juguete"""
     actualizado = actualizar_juguete(
@@ -65,7 +80,11 @@ def actualizar_juguete_endpoint(
 
 
 @router.delete("/{juguete_id}", status_code=204)
-def eliminar_juguete_endpoint(juguete_id: int, db: Session = Depends(get_db)):
+def eliminar_juguete_endpoint(
+    juguete_id: int,
+    db: Session = Depends(get_db),
+    admin: Usuario = Depends(get_current_admin),
+):
     """Eliminar un juguete"""
     juguete = db.query(Juguete).filter(Juguete.id == juguete_id).first()
     if not juguete:

@@ -10,18 +10,26 @@ from crud.venta_crud import (
 )
 from api.dependencias import get_db
 from utils.exceptions import VentaNoEncontrada, StockInsuficiente
+from api.auth_middleware import get_current_user, get_current_admin
+from entities.usuario import Usuario
 
 router = APIRouter()
 
 
 @router.get("/", response_model=list[VentaResponse])
-def listar_ventas(db: Session = Depends(get_db)):
+def listar_ventas(
+    db: Session = Depends(get_db), admin: Usuario = Depends(get_current_admin)
+):
     """Listar todas las ventas"""
     return obtener_ventas(db)
 
 
 @router.post("/", response_model=VentaResponse, status_code=201)
-def crear_venta_endpoint(venta: VentaCreate, db: Session = Depends(get_db)):
+def crear_venta_endpoint(
+    venta: VentaCreate,
+    db: Session = Depends(get_db),
+    admin: Usuario = Depends(get_current_admin),
+):
     """Crear una nueva venta"""
     try:
         nueva_venta = crear_venta(
@@ -35,7 +43,11 @@ def crear_venta_endpoint(venta: VentaCreate, db: Session = Depends(get_db)):
 
 
 @router.get("/{venta_id}", response_model=VentaResponse)
-def obtener_venta_endpoint(venta_id: int, db: Session = Depends(get_db)):
+def obtener_venta_endpoint(
+    venta_id: int,
+    db: Session = Depends(get_db),
+    admin: Usuario = Depends(get_current_admin),
+):
     """Obtener una venta por ID"""
     venta = obtener_venta_por_id(db, venta_id)
     if not venta:
@@ -45,7 +57,10 @@ def obtener_venta_endpoint(venta_id: int, db: Session = Depends(get_db)):
 
 @router.put("/{venta_id}", response_model=VentaResponse)
 def actualizar_venta_endpoint(
-    venta_id: int, venta: VentaCreate, db: Session = Depends(get_db)
+    venta_id: int,
+    venta: VentaCreate,
+    db: Session = Depends(get_db),
+    admin: Usuario = Depends(get_current_admin),
 ):
     """Actualizar una venta"""
     venta_actualizada = actualizar_venta(
@@ -57,7 +72,11 @@ def actualizar_venta_endpoint(
 
 
 @router.delete("/{venta_id}", status_code=204)
-def eliminar_venta_endpoint(venta_id: int, db: Session = Depends(get_db)):
+def eliminar_venta_endpoint(
+    venta_id: int,
+    db: Session = Depends(get_db),
+    admin: Usuario = Depends(get_current_admin),
+):
     """Eliminar una venta"""
     eliminado = eliminar_venta(db, venta_id)
     if not eliminado:

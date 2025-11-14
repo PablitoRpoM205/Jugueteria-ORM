@@ -1,0 +1,127 @@
+<div class="register-container">
+    <div class="register-card">
+        <div class="register-header">
+            <div class="logo">
+                <span class="logo-icon">ITM</span>
+            </div>
+            <h2>Crear Cuenta</h2>
+            <p>Únete a ITM Juguetería</p>
+        </div>
+
+        <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+            <!-- NOMBRE -->
+            <div class="form-group">
+                <label for="nombre">
+                    <i class="fas fa-user"></i>
+                    Nombre Completo
+                </label>
+                <input type="text" id="nombre" formControlName="nombre" placeholder="Juan Pérez"
+                    [class.error]="registerForm.get('nombre')?.invalid && registerForm.get('nombre')?.touched" />
+                <!-- ✅ MENSAJE DE VALIDACIÓN -->
+                <span class="error-message" *ngIf="validationMessages.nombre">
+                    {{ validationMessages.nombre }}
+                </span>
+            </div>
+
+            <!-- CORREO -->
+            <div class="form-group">
+                <label for="correo">
+                    <i class="fas fa-envelope"></i>
+                    Correo Electrónico
+                </label>
+                <input type="email" id="correo" formControlName="correo" placeholder="tu@email.com"
+                    [class.error]="registerForm.get('correo')?.invalid && registerForm.get('correo')?.touched" />
+                <span class="error-message"
+                    *ngIf="registerForm.get('correo')?.invalid && registerForm.get('correo')?.touched">
+                    Por favor ingresa un correo válido
+                </span>
+            </div>
+
+            <!-- CONTRASEÑA -->
+            <div class="form-group">
+                <label for="contrasena">
+                    <i class="fas fa-lock"></i>
+                    Contraseña
+                </label>
+                <div class="password-input">
+                    <input [type]="showPassword ? 'text' : 'password'" id="contrasena" formControlName="contrasena"
+                        placeholder="Mínimo 6 caracteres"
+                        [class.error]="registerForm.get('contrasena')?.invalid && registerForm.get('contrasena')?.touched" />
+                    <button type="button" class="toggle-password" (click)="togglePassword()">
+                        <i class="fas" [class.fa-eye]="!showPassword" [class.fa-eye-slash]="showPassword"></i>
+                    </button>
+                </div>
+                <!-- ✅ MENSAJE DE VALIDACIÓN DE CONTRASEÑA -->
+                <span class="error-message" *ngIf="validationMessages.contrasena">
+                    {{ validationMessages.contrasena }}
+                </span>
+
+                <!-- ✅ REQUISITOS DE CONTRASEÑA -->
+                <div class="password-requirements" *ngIf="registerForm.get('contrasena')?.touched">
+                    <small [class.valid]="!registerForm.get('contrasena')?.errors?.['noMayuscula']">
+                        <i class="fas" [class.fa-check]="!registerForm.get('contrasena')?.errors?.['noMayuscula']"
+                            [class.fa-times]="registerForm.get('contrasena')?.errors?.['noMayuscula']"></i>
+                        Una mayúscula
+                    </small>
+                    <small [class.valid]="!registerForm.get('contrasena')?.errors?.['noMinuscula']">
+                        <i class="fas" [class.fa-check]="!registerForm.get('contrasena')?.errors?.['noMinuscula']"
+                            [class.fa-times]="registerForm.get('contrasena')?.errors?.['noMinuscula']"></i>
+                        Una minúscula
+                    </small>
+                    <small [class.valid]="!registerForm.get('contrasena')?.errors?.['noNumero']">
+                        <i class="fas" [class.fa-check]="!registerForm.get('contrasena')?.errors?.['noNumero']"
+                            [class.fa-times]="registerForm.get('contrasena')?.errors?.['noNumero']"></i>
+                        Un número
+                    </small>
+                </div>
+            </div>
+
+            <!-- CONFIRMAR CONTRASEÑA -->
+            <div class="form-group">
+                <label for="confirmarContrasena">
+                    <i class="fas fa-lock"></i>
+                    Confirmar Contraseña
+                </label>
+                <div class="password-input">
+                    <input [type]="showConfirmPassword ? 'text' : 'password'" id="confirmarContrasena"
+                        formControlName="confirmarContrasena" placeholder="Repite tu contraseña"
+                        [class.error]="registerForm.get('confirmarContrasena')?.invalid && registerForm.get('confirmarContrasena')?.touched" />
+                    <button type="button" class="toggle-password" (click)="toggleConfirmPassword()">
+                        <i class="fas" [class.fa-eye]="!showConfirmPassword"
+                            [class.fa-eye-slash]="showConfirmPassword"></i>
+                    </button>
+                </div>
+                <span class="error-message"
+                    *ngIf="registerForm.hasError('passwordMismatch') && registerForm.get('confirmarContrasena')?.touched">
+                    Las contraseñas no coinciden
+                </span>
+            </div>
+
+            <!-- MENSAJES DE ÉXITO/ERROR -->
+            <div class="success-alert" *ngIf="successMessage">
+                <i class="fas fa-check-circle"></i>
+                {{ successMessage }}
+            </div>
+
+            <div class="error-alert" *ngIf="errorMessage">
+                <i class="fas fa-exclamation-circle"></i>
+                {{ errorMessage }}
+            </div>
+
+            <button type="submit" class="btn-register" [disabled]="registerForm.invalid || isLoading">
+                <span *ngIf="!isLoading">
+                    <i class="fas fa-user-plus"></i>
+                    Crear Cuenta
+                </span>
+                <span *ngIf="isLoading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    Creando cuenta...
+                </span>
+            </button>
+
+            <div class="login-link">
+                ¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión aquí</a>
+            </div>
+        </form>
+    </div>
+</div>

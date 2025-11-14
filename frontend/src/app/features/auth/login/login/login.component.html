@@ -1,0 +1,65 @@
+<div class="login-container">
+    <div class="login-card">
+        <div class="login-header">
+            <div class="logo">
+                <span class="logo-icon">ITM</span>
+            </div>
+            <h2>Iniciar Sesión</h2>
+            <p>Bienvenido a ITM Juguetería</p>
+        </div>
+
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+            <div class="form-group">
+                <label for="correo">
+                    <i class="fas fa-envelope"></i>
+                    Correo Electrónico
+                </label>
+                <input type="email" id="correo" formControlName="correo" placeholder="tu@email.com"
+                    [class.error]="loginForm.get('correo')?.invalid && loginForm.get('correo')?.touched" />
+                <span class="error-message"
+                    *ngIf="loginForm.get('correo')?.invalid && loginForm.get('correo')?.touched">
+                    Por favor ingresa un correo válido
+                </span>
+            </div>
+
+            <div class="form-group">
+                <label for="contrasena">
+                    <i class="fas fa-lock"></i>
+                    Contraseña
+                </label>
+                <div class="password-input">
+                    <input [type]="showPassword ? 'text' : 'password'" id="contrasena" formControlName="contrasena"
+                        placeholder="••••••••"
+                        [class.error]="loginForm.get('contrasena')?.invalid && loginForm.get('contrasena')?.touched" />
+                    <button type="button" class="toggle-password" (click)="togglePassword()">
+                        <i class="fas" [class.fa-eye]="!showPassword" [class.fa-eye-slash]="showPassword"></i>
+                    </button>
+                </div>
+                <span class="error-message"
+                    *ngIf="loginForm.get('contrasena')?.invalid && loginForm.get('contrasena')?.touched">
+                    La contraseña es requerida
+                </span>
+            </div>
+
+            <div class="error-alert" *ngIf="errorMessage">
+                <i class="fas fa-exclamation-circle"></i>
+                {{ errorMessage }}
+            </div>
+
+            <button type="submit" class="btn-login" [disabled]="loginForm.invalid || isLoading">
+                <span *ngIf="!isLoading">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Iniciar Sesión
+                </span>
+                <span *ngIf="isLoading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    Cargando...
+                </span>
+            </button>
+
+            <div class="register-link">
+                ¿No tienes cuenta? <a routerLink="/register">Regístrate aquí</a>
+            </div>
+        </form>
+    </div>
+</div>

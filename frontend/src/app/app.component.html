@@ -1,7 +1,8 @@
-<div class="wrapper">
+<div class="wrapper" *ngIf="!isAuthPage()">
   <button class="menu-toggle" (click)="toggleSidebar()">
     <i class="fas fa-bars"></i>
   </button>
+
   <div class="overlay" [class.active]="!sidebarCollapsed" (click)="toggleSidebar()">
   </div>
 
@@ -14,4 +15,8 @@
       <router-outlet></router-outlet>
     </div>
   </div>
+</div>
+
+<div class="auth-wrapper" *ngIf="isAuthPage()">
+  <router-outlet></router-outlet>
 </div>

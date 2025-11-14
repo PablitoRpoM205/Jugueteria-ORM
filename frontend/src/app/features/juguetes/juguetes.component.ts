@@ -131,8 +131,28 @@ export class JuguetesComponent {
   }
 
   eliminar(id: number) {
-    if (confirm('¿Eliminar este juguete?')) {
-      this.juguetesService.eliminarJuguete(id).subscribe(() => this.cargarJuguetes());
+    if (confirm('¿Estás seguro de eliminar este juguete?')) {
+      this.juguetesService.eliminarJuguete(id).subscribe({
+        next: () => {
+          this.cargarJuguetes();
+          this.mostrarNotificacion('✅ Juguete eliminado correctamente', true);
+        },
+        error: (err) => {
+          console.error('Error al eliminar:', err);
+
+
+          let mensajeError = '❌ No se pudo eliminar el juguete';
+
+          if (err.status === 400 || err.status === 409) {
+
+            mensajeError = '❌ No se puede eliminar: Este juguete está asociado a un inventario o venta';
+          } else if (err.error?.detail) {
+            mensajeError = `❌ ${err.error.detail}`;
+          }
+
+          this.mostrarNotificacion(mensajeError, false);
+        }
+      });
     }
   }
   limpiarBusqueda() {
@@ -142,6 +162,15 @@ export class JuguetesComponent {
   }
   cerrarModal() {
     this.editando = null;
+  }
+  mostrarNotificacion(mensaje: string, exito: boolean) {
+    this.mensaje = mensaje;
+    this.mensajeExito = exito;
+    this.mostrarMensaje = true;
+
+    setTimeout(() => {
+      this.mostrarMensaje = false;
+    }, 3000);
   }
 
   actualizar() {

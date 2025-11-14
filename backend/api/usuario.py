@@ -11,27 +11,40 @@ from crud.usuario_crud import (
 from entities.usuario import Usuario
 from api.dependencias import get_db
 from utils.exceptions import UsuarioNoEncontrado, UsuarioTieneRelaciones
+from api.auth_middleware import get_current_user, get_current_admin
+from entities.usuario import Usuario
 
 router = APIRouter()
 
 
 @router.post("/", response_model=UsuarioResponse, status_code=201)
-def crear_usuario_endpoint(usuario: UsuarioCreate, db: Session = Depends(get_db)):
+def crear_usuario_endpoint(
+    usuario: UsuarioCreate,
+    db: Session = Depends(get_db),
+    admin: Usuario = Depends(get_current_admin),
+):
     """Crear un nuevo usuario"""
     nuevo_usuario = crear_usuario(
-        db, usuario.nombre, usuario.correo, usuario.contrasena
+        db, usuario.nombre, usuario.correo, usuario.contrasena, usuario.es_admin
     )
     return nuevo_usuario
 
 
 @router.get("/", response_model=list[UsuarioResponse])
-def listar_usuarios_endpoint(db: Session = Depends(get_db)):
+def listar_usuarios_endpoint(
+    db: Session = Depends(get_db),
+    admin: Usuario = Depends(get_current_admin),
+):
     """Listar todos los usuarios"""
     return listar_usuarios(db)
 
 
 @router.get("/{usuario_id}", response_model=UsuarioResponse)
-def obtener_usuario_endpoint(usuario_id: int, db: Session = Depends(get_db)):
+def obtener_usuario_endpoint(
+    usuario_id: int,
+    db: Session = Depends(get_db),
+    usuario_actual: Usuario = Depends(get_current_user),
+):
     """Obtener un usuario por ID"""
     usuario = obtener_usuario(db, usuario_id)
     if usuario is None:
@@ -41,7 +54,10 @@ def obtener_usuario_endpoint(usuario_id: int, db: Session = Depends(get_db)):
 
 @router.put("/{usuario_id}", response_model=UsuarioResponse)
 def actualizar_usuario_endpoint(
-    usuario_id: int, usuario: UsuarioUpdate, db: Session = Depends(get_db)
+    usuario_id: int,
+    usuario: UsuarioUpdate,
+    db: Session = Depends(get_db),
+    admin: Usuario = Depends(get_current_admin),
 ):
     """Actualizar un usuario"""
 
@@ -53,7 +69,11 @@ def actualizar_usuario_endpoint(
 
 
 @router.delete("/{usuario_id}", status_code=204)
-def eliminar_usuario_endpoint(usuario_id: int, db: Session = Depends(get_db)):
+def eliminar_usuario_endpoint(
+    usuario_id: int,
+    db: Session = Depends(get_db),
+    admin: Usuario = Depends(get_current_admin),
+):
     """Eliminar un usuario"""
     usuario = db.query(Usuario).filter(Usuario.id == usuario_id).first()
     if not usuario:

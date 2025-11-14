@@ -27,7 +27,7 @@ export class VentasComponent implements OnInit {
   constructor(private ventasService: VentasService) { }
 
   ngOnInit(): void {
-    console.log('🔵 Iniciando componente de ventas');
+    console.log('Iniciando componente de ventas');
     this.cargarVentas();
   }
 
@@ -65,10 +65,10 @@ export class VentasComponent implements OnInit {
   }
 
   cargarVentas(): void {
-    console.log('🔵 Cargando ventas...');
+    console.log('Cargando ventas...');
     this.ventasService.obtenerVentas().subscribe({
       next: (data) => {
-        console.log('✅ Ventas recibidas:', data);
+        console.log('Ventas recibidas:', data);
         this.ventas = data;
         console.log('Total ventas:', this.ventas.length);
         console.log('Total páginas:', this.totalPages);

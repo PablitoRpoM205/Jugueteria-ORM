@@ -10,10 +10,11 @@ import { Usuario } from 'src/app/models/usuario.model';
 export class UsuariosComponent implements OnInit {
   usuarios: Usuario[] = [];
   nuevo: Usuario = {
-    id: 0,
+    id: 1,
     nombre: '',
     correo: '',
-    contrasena: ''
+    contrasena: '',
+    es_admin: false
   };
   editando: Usuario | null = null;
   buscarId: number | null = null;
@@ -27,7 +28,7 @@ export class UsuariosComponent implements OnInit {
   constructor(private usuariosService: UsuariosService) { }
 
   ngOnInit(): void {
-    console.log('🔵 Iniciando componente de usuarios');
+    console.log('Iniciando componente de usuarios');
     this.cargarUsuarios();
   }
 
@@ -65,16 +66,16 @@ export class UsuariosComponent implements OnInit {
   }
 
   cargarUsuarios(): void {
-    console.log('🔵 Cargando usuarios...');
+    console.log('Cargando usuarios...');
     this.usuariosService.ObtenerUsuarios().subscribe({
       next: (data) => {
-        console.log('✅ Usuarios recibidos:', data);
+        console.log('Usuarios recibidos:', data);
         this.usuarios = data;
         console.log('Total usuarios:', this.usuarios.length);
         console.log('Total páginas:', this.totalPages);
       },
       error: (error) => {
-        console.error('❌ Error al cargar los usuarios:', error);
+        console.error('Error al cargar los usuarios:', error);
         this.mostrarNotificacion('❌ Error al cargar los usuarios', false);
       }
     });
@@ -95,7 +96,8 @@ export class UsuariosComponent implements OnInit {
           id: 0,
           nombre: '',
           correo: '',
-          contrasena: ''
+          contrasena: '',
+          es_admin: false
         };
         this.mostrarNotificacion('✅ Usuario creado correctamente', true);
       },
@@ -126,7 +128,7 @@ export class UsuariosComponent implements OnInit {
   }
 
   editar(usuario: Usuario) {
-    this.editando = { ...usuario };
+    this.editando = { ...usuario, contrasena: '' };
   }
 
   eliminar(id: number) {
@@ -156,6 +158,15 @@ export class UsuariosComponent implements OnInit {
   actualizar() {
     if (!this.editando || !this.editando.id) return;
 
+    const datosActualizar: any = {
+      nombre: this.editando.nombre,
+      correo: this.editando.correo,
+      es_admin: this.editando.es_admin
+    };
+
+    if (this.editando.contrasena && this.editando.contrasena.trim() !== '') {
+      datosActualizar.contrasena = this.editando.contrasena;
+    }
     this.usuariosService.actualizarUsuario(this.editando.id, this.editando).subscribe({
       next: () => {
         this.cargarUsuarios();

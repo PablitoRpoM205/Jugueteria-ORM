@@ -1,8 +1,8 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from entities.venta import Venta
 from entities.juguete import Juguete
 from entities.inventario import Inventario
-from database.connection import SessionLocal
 from typing import Optional
 from fastapi import HTTPException
 
@@ -16,11 +16,13 @@ def crear_venta(db: Session, juguete_id: int, cantidad: int, usuario_id: int) ->
         )
         .first()
     )
+
     if not inventario:
         raise HTTPException(
             status_code=404,
             detail=f"No se encontró inventario para el juguete {juguete_id} y usuario {usuario_id}",
         )
+
     if inventario.cantidad < cantidad:
         raise HTTPException(
             status_code=400,
@@ -29,12 +31,20 @@ def crear_venta(db: Session, juguete_id: int, cantidad: int, usuario_id: int) ->
 
     inventario.cantidad -= cantidad
 
-    juguete = db.query(Juguete).filter_by(id=juguete_id).first()
+    db.flush()
+
+    stock_total = (
+        db.query(func.sum(Inventario.cantidad))
+        .filter(Inventario.juguete_id == juguete_id)
+        .scalar()
+        or 0
+    )
+
+    juguete = db.query(Juguete).filter(Juguete.id == juguete_id).first()
     if not juguete:
-        raise HTTPException(
-            status_code=404, detail=f"No se encontró el juguete con ID {juguete_id}"
-        )
-    juguete.stock = inventario.cantidad
+        raise HTTPException(status_code=404, detail=f"Juguete no encontrado")
+
+    juguete.stock = stock_total
 
     nueva_venta = Venta(juguete_id=juguete_id, cantidad=cantidad, usuario_id=usuario_id)
     db.add(nueva_venta)
@@ -43,7 +53,46 @@ def crear_venta(db: Session, juguete_id: int, cantidad: int, usuario_id: int) ->
     db.refresh(nueva_venta)
     db.refresh(inventario)
     db.refresh(juguete)
+
     return nueva_venta
+
+
+def eliminar_venta(db: Session, venta_id: int) -> bool:
+    venta = db.query(Venta).filter(Venta.id == venta_id).first()
+    if not venta:
+        return False
+
+    inventario = (
+        db.query(Inventario)
+        .filter(
+            Inventario.juguete_id == venta.juguete_id,
+            Inventario.usuario_id == venta.usuario_id,
+        )
+        .first()
+    )
+
+    if inventario:
+
+        inventario.cantidad += venta.cantidad
+
+        db.flush()
+
+        stock_total = (
+            db.query(func.sum(Inventario.cantidad))
+            .filter(Inventario.juguete_id == venta.juguete_id)
+            .scalar()
+            or 0
+        )
+
+        juguete = db.query(Juguete).filter(Juguete.id == venta.juguete_id).first()
+        if juguete:
+            juguete.stock = stock_total
+
+        db.delete(venta)
+
+        db.commit()
+        return True
+    return False
 
 
 def obtener_ventas(db: Session):
@@ -71,19 +120,34 @@ def actualizar_venta(
     )
 
     if not inventario:
-        raise Exception("Inventario no encontrado para la venta existente")
+        raise HTTPException(
+            status_code=404, detail="Inventario no encontrado para la venta existente"
+        )
+
     diferencia_cantidad = nueva_cantidad - venta.cantidad
 
     if diferencia_cantidad > 0:
         if inventario.cantidad < diferencia_cantidad:
-            raise Exception("Inventario insuficiente para aumentar la cantidad")
+            raise HTTPException(
+                status_code=400,
+                detail="Inventario insuficiente para aumentar la cantidad",
+            )
         inventario.cantidad -= diferencia_cantidad
     elif diferencia_cantidad < 0:
         inventario.cantidad += abs(diferencia_cantidad)
 
+    db.flush()
+
+    stock_total = (
+        db.query(func.sum(Inventario.cantidad))
+        .filter(Inventario.juguete_id == venta.juguete_id)
+        .scalar()
+        or 0
+    )
+
     juguete = db.query(Juguete).filter(Juguete.id == venta.juguete_id).first()
     if juguete:
-        juguete.stock = inventario.cantidad
+        juguete.stock = stock_total
 
     venta.usuario_id = usuario_id
     venta.juguete_id = juguete_id
@@ -92,28 +156,3 @@ def actualizar_venta(
     db.commit()
     db.refresh(venta)
     return venta
-
-
-def eliminar_venta(db: Session, venta_id: int) -> bool:
-    venta = db.query(Venta).filter(Venta.id == venta_id).first()
-    if not venta:
-        return False
-
-    inventario = (
-        db.query(Inventario)
-        .filter(
-            Inventario.juguete_id == venta.juguete_id,
-            Inventario.usuario_id == venta.usuario_id,
-        )
-        .first()
-    )
-    if inventario:
-        inventario.cantidad += venta.cantidad
-        juguete = db.query(Juguete).filter(Juguete.id == venta.juguete_id).first()
-        if juguete:
-            juguete.stock = inventario.cantidad
-
-        db.delete(venta)
-        db.commit()
-        return True
-    return False

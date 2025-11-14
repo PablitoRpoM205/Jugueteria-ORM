@@ -2,6 +2,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from database.connection import engine
 from entities.base import Base
+from entities.usuario import Usuario
+from entities.juguete import Juguete
+from entities.venta import Venta
+from entities.inventario import Inventario
 from api.usuario import router as usuario_router
 from api.juguete import router as juguete_router
 from api.venta import router as venta_router

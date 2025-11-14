@@ -31,3 +31,13 @@
         <span>Ventas</span>
     </li>
 </ul>
+<div class="sidebar-footer">
+    <div class="user-info" *ngIf="currentUser">
+        <i class="fas fa-user-circle"></i>
+        <span>{{ currentUser.nombre }}</span>
+    </div>
+    <button class="logout-btn" (click)="logout()" title="Cerrar Sesión">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Cerrar Sesión</span>
+    </button>
+</div>

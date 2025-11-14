@@ -25,7 +25,7 @@ export class InventarioComponent implements OnInit {
   constructor(private inventarioService: InventarioService) { }
 
   ngOnInit(): void {
-    console.log('🔵 Iniciando componente de inventario');
+    console.log('Iniciando componente de inventario');
     this.cargarInventario();
   }
 
@@ -63,10 +63,10 @@ export class InventarioComponent implements OnInit {
   }
 
   cargarInventario(): void {
-    console.log('🔵 Cargando inventario...');
+    console.log('Cargando inventario...');
     this.inventarioService.obtenerInventario().subscribe({
       next: (data) => {
-        console.log('✅ Inventario recibido:', data);
+        console.log('Inventario recibido:', data);
         this.inventario = data;
         console.log('Total inventario:', this.inventario.length);
         console.log('Total páginas:', this.totalPages);
